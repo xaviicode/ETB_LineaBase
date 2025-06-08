@@ -8,11 +8,67 @@ using System.Threading.Tasks;
 using System.Windows.Data;
 using System.Windows.Input;
 using System.Windows.Media;
+using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Input;
 
 namespace LineaBaseETB_V2.ViewModels
 {
     public class MainViewModel : INotifyPropertyChanged
     {
+        // Filtros para Work Items
+        public ObservableCollection<string> EstadosDisponibles { get; } = new ObservableCollection<string>
+        {
+            "Activo", "Cerrado", "Resuelto", "Nuevo"
+        };
+
+        private string _estadoSeleccionado;
+        public string EstadoSeleccionado
+        {
+            get => _estadoSeleccionado;
+            set
+            {
+                if (SetProperty(ref _estadoSeleccionado, value))
+                {
+                    // Aquí puedes activar filtrado automático si lo deseas
+                }
+            }
+        }
+
+        public ObservableCollection<string> TiposDisponibles { get; } = new ObservableCollection<string>
+        {
+            "Bug", "Task", "User Story"
+        };
+
+        private string _tipoSeleccionado;
+        public string TipoSeleccionado
+        {
+            get => _tipoSeleccionado;
+            set
+            {
+                if (SetProperty(ref _tipoSeleccionado, value))
+                {
+                    // Aquí puedes activar filtrado automático si lo deseas
+                }
+            }
+        }
+
+        private string _asignadoA;
+        public string AsignadoA
+        {
+            get => _asignadoA;
+            set
+            {
+                if (SetProperty(ref _asignadoA, value))
+                {
+                    // Aquí puedes activar filtrado automático si lo deseas
+                }
+            }
+        }
+
+        // Comando de filtro
+        public ICommand FiltrarCommand { get; }
+
+        // --- Tu código original ---
         private string _organization;
         private string _pat;
         private string _proyectoSeleccionado;
@@ -31,7 +87,6 @@ namespace LineaBaseETB_V2.ViewModels
             private set => SetProperty(ref _workItemsView, value);
         }
 
-        // Brushes para bordes
         private Brush _organizationBorderBrush = Brushes.Gray;
         public Brush OrganizationBorderBrush
         {
@@ -124,8 +179,11 @@ namespace LineaBaseETB_V2.ViewModels
         {
             ConsultarCommand = new RelayCommand(async () => await ConsultarWorkItemsAsync(), () => CanConsultar);
 
+            // Inicializa el comando de filtro (corregido para async Task)
+            FiltrarCommand = new RelayCommand(async () => await AplicarFiltros());
+
             WorkItemsView = CollectionViewSource.GetDefaultView(WorkItems);
-            WorkItemsView.Filter = null; // Sin filtro
+            WorkItemsView.Filter = null; // Sin filtro por defecto
         }
 
         private void ClearData()
@@ -210,6 +268,13 @@ namespace LineaBaseETB_V2.ViewModels
             ProyectoBorderBrush = string.IsNullOrWhiteSpace(ProyectoSeleccionado) ? Brushes.Red : Brushes.Gray;
         }
 
+        // Lógica del comando de filtro (corregido a async Task)
+        private async Task AplicarFiltros()
+        {
+            // Aquí irá la lógica de filtrado sobre WorkItemsView en el siguiente incremento.
+            await Task.CompletedTask;
+        }
+
         #region INotifyPropertyChanged
 
         public event PropertyChangedEventHandler PropertyChanged;
@@ -230,6 +295,7 @@ namespace LineaBaseETB_V2.ViewModels
         #endregion
     }
 
+    // Tu implementación custom de RelayCommand se mantiene igual
     public class RelayCommand : ICommand
     {
         private readonly Func<Task> _executeAsync;
