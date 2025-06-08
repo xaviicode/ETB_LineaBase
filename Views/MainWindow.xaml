@@ -1,0 +1,197 @@
+﻿<Window x:Class="LineaBaseETB_V2.Views.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:local="clr-namespace:LineaBaseETB_V2.Helpers"
+        xmlns:viewmodels="clr-namespace:LineaBaseETB_V2.ViewModels"
+        Title="LineaBaseETB V2" Height="750" Width="950"
+        WindowStartupLocation="CenterScreen"
+        Background="{StaticResource ETBAzulClaroBrush}">
+
+    <Window.Resources>
+        <!-- Colores corporativos ETB -->
+        <Color x:Key="ETBAzulFuerte">#25729A</Color>
+        <Color x:Key="ETBAzulClaro">#39BCEB</Color>
+        <Color x:Key="ETBAzulMuyClaro">#6ED3F7</Color>
+        <Color x:Key="ETBBlanco">#FFFFFF</Color>
+
+        <SolidColorBrush x:Key="ETBAzulFuerteBrush" Color="{StaticResource ETBAzulFuerte}" />
+        <SolidColorBrush x:Key="ETBAzulClaroBrush" Color="{StaticResource ETBAzulClaro}" />
+        <SolidColorBrush x:Key="ETBAzulMuyClaroBrush" Color="{StaticResource ETBAzulMuyClaro}" />
+        <SolidColorBrush x:Key="ETBBlancoBrush" Color="{StaticResource ETBBlanco}" />
+
+        <!-- Estilo para botones -->
+        <Style TargetType="Button">
+            <Setter Property="Background" Value="{StaticResource ETBAzulFuerteBrush}" />
+            <Setter Property="Foreground" Value="White" />
+            <Setter Property="FontWeight" Value="SemiBold" />
+            <Setter Property="Padding" Value="8,4" />
+            <Setter Property="Margin" Value="5" />
+            <Setter Property="BorderBrush" Value="{StaticResource ETBAzulFuerteBrush}" />
+            <Setter Property="BorderThickness" Value="1" />
+            <Setter Property="Cursor" Value="Hand" />
+            <Setter Property="HorizontalAlignment" Value="Left" />
+            <Setter Property="VerticalAlignment" Value="Center" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                CornerRadius="4">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter Property="Background" Value="{StaticResource ETBAzulMuyClaroBrush}" />
+                                <Setter Property="BorderBrush" Value="{StaticResource ETBAzulMuyClaroBrush}" />
+                            </Trigger>
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter Property="Background" Value="{StaticResource ETBAzulFuerteBrush}" />
+                                <Setter Property="BorderBrush" Value="{StaticResource ETBAzulFuerteBrush}" />
+                            </Trigger>
+                            <Trigger Property="IsEnabled" Value="False">
+                                <Setter Property="Background" Value="Gray" />
+                                <Setter Property="BorderBrush" Value="Gray" />
+                                <Setter Property="Foreground" Value="#DDD" />
+                                <Setter Property="Cursor" Value="Arrow" />
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <!-- Estilo para DataGrid -->
+        <Style TargetType="DataGrid">
+            <Setter Property="Background" Value="{StaticResource ETBBlancoBrush}" />
+            <Setter Property="RowBackground" Value="{StaticResource ETBAzulMuyClaroBrush}" />
+            <Setter Property="AlternatingRowBackground" Value="{StaticResource ETBBlancoBrush}" />
+            <Setter Property="Foreground" Value="{StaticResource ETBAzulFuerteBrush}" />
+            <Setter Property="GridLinesVisibility" Value="None" />
+            <Setter Property="BorderBrush" Value="{StaticResource ETBAzulFuerteBrush}" />
+            <Setter Property="BorderThickness" Value="1" />
+            <Setter Property="Margin" Value="10" />
+            <Setter Property="FontSize" Value="14" />
+        </Style>
+
+        <!-- Convertidores -->
+        <local:InverseBooleanConverter x:Key="InverseBooleanConverter" />
+        <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter" />
+    </Window.Resources>
+
+    <Window.DataContext>
+        <viewmodels:MainViewModel />
+    </Window.DataContext>
+
+    <Grid Margin="20" Cursor="Arrow">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <!-- Header -->
+            <RowDefinition Height="Auto" />
+            <!-- Inputs -->
+            <RowDefinition Height="Auto" />
+            <!-- Filtros -->
+            <RowDefinition Height="Auto" />
+            <!-- Botón -->
+            <RowDefinition Height="Auto" />
+            <!-- Mensaje -->
+            <RowDefinition Height="Auto" />
+            <!-- Progress -->
+            <RowDefinition Height="*" />
+            <!-- DataGrid -->
+        </Grid.RowDefinitions>
+
+        <!-- Encabezado con logo y título -->
+        <StackPanel Orientation="Horizontal" Grid.Row="0" Margin="0,0,0,20" VerticalAlignment="Center">
+            <Image Source="/LineaBaseETB_V2;component/Images/etb_logo.png" Height="46" Width="81" />
+            <TextBlock Text="Automation"
+                       FontSize="36"
+                       FontWeight="Bold"
+                       Foreground="{StaticResource ETBAzulFuerteBrush}" Width="207" RenderTransformOrigin="0.664,0.567" VerticalAlignment="Bottom" Margin="0,0,10,0" />
+        </StackPanel>
+
+        <!-- Organización -->
+        <StackPanel Orientation="Horizontal" Grid.Row="1" Margin="0,0,0,10" VerticalAlignment="Center">
+            <TextBlock Text="Organización:" Width="150" VerticalAlignment="Center" FontWeight="Bold" Foreground="{StaticResource ETBAzulFuerteBrush}" />
+            <TextBox Text="{Binding Organization, UpdateSourceTrigger=PropertyChanged}" 
+                     Width="300"
+                     BorderBrush="{Binding OrganizationBorderBrush}" BorderThickness="1"
+                     IsEnabled="{Binding IsLoading, Converter={StaticResource InverseBooleanConverter}}"
+                     ToolTip="Introduce el nombre de la organización en Azure DevOps" />
+        </StackPanel>
+
+        <!-- PAT -->
+        <StackPanel Orientation="Horizontal" Grid.Row="2" Margin="0,0,0,10" VerticalAlignment="Center">
+            <TextBlock Text="PAT (Token de acceso):" Width="150" VerticalAlignment="Center" FontWeight="Bold" Foreground="{StaticResource ETBAzulFuerteBrush}" />
+            <PasswordBox x:Name="PatBox" Width="300" 
+                         PasswordChanged="PatBox_PasswordChanged"
+                         BorderBrush="{Binding PatBorderBrush}" BorderThickness="1"
+                         IsEnabled="{Binding IsLoading, Converter={StaticResource InverseBooleanConverter}}"
+                         ToolTip="Introduce tu token de acceso personal (PAT)" />
+        </StackPanel>
+
+        <!-- Proyecto -->
+        <StackPanel Orientation="Horizontal" Grid.Row="3" Margin="0,0,0,10" VerticalAlignment="Center">
+            <TextBlock Text="Proyecto:" Width="150" VerticalAlignment="Center" FontWeight="Bold" Foreground="{StaticResource ETBAzulFuerteBrush}" />
+            <ComboBox ItemsSource="{Binding Proyectos}" SelectedItem="{Binding ProyectoSeleccionado}" 
+                      Width="300"
+                      BorderBrush="{Binding ProyectoBorderBrush}" BorderThickness="1"
+                      IsEnabled="{Binding IsLoading, Converter={StaticResource InverseBooleanConverter}}"
+                      ToolTip="Selecciona el proyecto de Azure DevOps" />
+        </StackPanel>
+
+        <!-- Filtros: Tipo y búsqueda -->
+        <!--<StackPanel Orientation="Horizontal" Grid.Row="4" Margin="0,0,0,10" VerticalAlignment="Center">
+             <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                <TextBlock Text="Tipo:" Width="150" VerticalAlignment="Center" FontWeight="Bold" Foreground="{StaticResource ETBAzulFuerteBrush}" Margin="0,0,10,0" />
+                <ComboBox Width="150" SelectedItem="{Binding TipoSeleccionado, UpdateSourceTrigger=PropertyChanged}">
+                    <ComboBoxItem Content="" />
+                    <ComboBoxItem Content="Carrito" />
+                    <ComboBoxItem Content="Avión" />
+                </ComboBox>
+            </StackPanel>
+
+            <StackPanel Orientation="Horizontal" VerticalAlignment="Center" Margin="20,0,0,0">
+                <TextBlock Text="Buscar Iniciativa:" Width="150" VerticalAlignment="Center" FontWeight="Bold" Foreground="{StaticResource ETBAzulFuerteBrush}" Margin="0,0,10,0" />
+                <TextBox Width="150" Text="{Binding FiltroIniciativa, UpdateSourceTrigger=PropertyChanged}" ToolTip="Buscar por número de iniciativa" />
+                <TextBlock Text="{Binding IsLoading}" Foreground="Blue" />
+            </StackPanel>
+        </StackPanel>-->
+
+        <!-- Botón Consultar -->
+        <Button Content="Consultar Work Items" Command="{Binding ConsultarCommand}" 
+                Grid.Row="5" Width="200" Height="35" HorizontalAlignment="Left"
+                ToolTip="Haz clic para consultar los Work Items" />
+
+        <!-- Mensaje de estado -->
+        <TextBlock Text="{Binding StatusMessage}" Grid.Row="6" Foreground="{StaticResource ETBAzulFuerteBrush}" FontWeight="SemiBold" TextWrapping="Wrap" Margin="0,10,0,0" />
+        <TextBlock Text="{Binding CanConsultar}" Foreground="Red" Grid.Row="6" HorizontalAlignment="Right" Margin="0,10,10,0" />
+
+        <!-- Indicador de carga -->
+        <ProgressBar Grid.Row="7" Height="20" Margin="0,10,0,0" IsIndeterminate="True" Visibility="{Binding IsLoading, Converter={StaticResource BooleanToVisibilityConverter}}" />
+
+        <!-- DataGrid para mostrar Work Items -->
+        <DataGrid ItemsSource="{Binding WorkItemsView}" AutoGenerateColumns="False" IsReadOnly="True" Grid.Row="8" Margin="0,10,0,0" Height="350">
+            <DataGrid.Columns>
+                <DataGridTextColumn Header="ID" Binding="{Binding Id}" Width="Auto" />
+                <DataGridTextColumn Header="Título" Binding="{Binding Title}" Width="2*" />
+                <DataGridTextColumn Header="Estado" Binding="{Binding State}" Width="Auto" />
+                <DataGridTextColumn Header="Número Iniciativa" Binding="{Binding NumeroIniciativa}" Width="Auto" />
+                <DataGridTextColumn Header="Sistema 1" Binding="{Binding Sistema1}" Width="Auto" />
+                <DataGridTextColumn Header="Sistema 2" Binding="{Binding Sistema2}" Width="Auto" />
+                <DataGridTextColumn Header="Sistema 3" Binding="{Binding Sistema3}" Width="Auto" />
+                <DataGridTextColumn Header="Sistema 4" Binding="{Binding Sistema4}" Width="Auto" />
+                <DataGridTextColumn Header="Sistema 5" Binding="{Binding Sistema5}" Width="Auto" />
+                <DataGridTextColumn Header="Sistema 6" Binding="{Binding Sistema6}" Width="Auto" />
+                <DataGridTextColumn Header="Sistema 7" Binding="{Binding Sistema7}" Width="Auto" />
+                <DataGridTextColumn Header="Sistema 8" Binding="{Binding Sistema8}" Width="Auto" />
+                <DataGridTextColumn Header="Sistema 9" Binding="{Binding Sistema9}" Width="Auto" />
+                <DataGridTextColumn Header="Sistema 10" Binding="{Binding Sistema10}" Width="Auto" />
+                <DataGridTextColumn Header="Sistema 11" Binding="{Binding Sistema11}" Width="Auto" />
+                <DataGridTextColumn Header="Sistema 12" Binding="{Binding Sistema12}" Width="Auto" />
+                <DataGridTextColumn Header="Sistemas Afectados" Binding="{Binding SistemasAfectados}" Width="Auto" />
+                <DataGridTextColumn Header="Fecha PnP" Binding="{Binding FechaPnP, StringFormat=d}" Width="Auto" />
+            </DataGrid.Columns>
+        </DataGrid>
+    </Grid>
+</Window>
