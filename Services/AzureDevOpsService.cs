@@ -16,12 +16,14 @@ namespace LineaBaseETB_V2.Services
         private readonly Uri _uri;
         private readonly VssBasicCredential _credentials;
 
-        // Campos que se consultan en Azure DevOps, según mapeo actualizado
+        // Campos que se consultan en Azure DevOps (agregados Type y AssignedTo)
         private readonly string[] fields = new[]
         {
-            "System.Id",
+            "System.Id",                  // AGREGADO para filtros
             "System.Title",
             "System.State",
+            "System.WorkItemType",        // AGREGADO para filtros
+            "System.AssignedTo",          //
             "Custom.NumeroIniciativa",
             "Custom.Sistema_1",
             "Custom.Sistema_2",
@@ -61,7 +63,6 @@ namespace LineaBaseETB_V2.Services
         {
             using var client = new WorkItemTrackingHttpClient(_uri, new VssCredentials(_credentials));
 
-            // Construcción de la consulta WIQL con los campos relevantes
             var wiql = new Wiql
             {
                 Query = $@"
@@ -106,9 +107,11 @@ namespace LineaBaseETB_V2.Services
         {
             return new WorkItemModel
             {
-                Id = wi.Id ?? 0,
+                Id = wi.Id ?? 0,  // AGREGADO
                 Title = GetFieldValue<string>(wi, "System.Title"),
                 State = GetFieldValue<string>(wi, "System.State"),
+                Type = GetFieldValue<string>(wi, "System.WorkItemType"),         // AGREGADO
+                AssignedTo = GetFieldValue<string>(wi, "System.AssignedTo"),     // 
                 NumeroIniciativa = GetFieldValue<string>(wi, "Custom.NumeroIniciativa"),
                 Sistema1 = GetFieldValue<string>(wi, "Custom.Sistema_1"),
                 Sistema2 = GetFieldValue<string>(wi, "Custom.Sistema_2"),

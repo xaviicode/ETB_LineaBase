@@ -1,9 +1,12 @@
-﻿using LineaBaseETB_V2.Models;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Input;
+using LineaBaseETB_V2.Models;
 using LineaBaseETB_V2.Services;
 using System;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
+using System.Security.Cryptography;
 using System.Threading.Tasks;
 using System.Windows.Data;
 using System.Windows.Input;
@@ -13,6 +16,56 @@ namespace LineaBaseETB_V2.ViewModels
 {
     public class MainViewModel : INotifyPropertyChanged
     {
+        // Filtros para Work Items
+        public ObservableCollection<string> EstadosDisponibles { get; } = new ObservableCollection<string>
+        {
+            "En revisión Líder Técnico", "En Revisión", "Pendiente Autorización QA", "Rechazado", "En Branch QA", "Desplegado QA", "Autorizado Release", "En Branch Release"
+        };
+
+        private string _estadoSeleccionado;
+        public string EstadoSeleccionado
+        {
+            get => _estadoSeleccionado;
+            set
+            {
+                if (SetProperty(ref _estadoSeleccionado, value))
+                {
+                    // Aquí puedes activar filtrado automático si lo deseas
+                }
+            }
+        }
+
+        private string _Id;
+        public string AsignadoA
+        {
+            get => _Id;
+            set
+            {
+                if (SetProperty(ref _Id, value))
+                {
+                    // Aquí puedes activar filtrado automático si lo deseas
+                }
+            }
+        }
+
+
+        private string _asignadoA;
+        public string asignadoA
+        {
+            get => _asignadoA;
+            set
+            {
+                if (SetProperty(ref _asignadoA, value))
+                {
+                    // Aquí puedes activar filtrado automático si lo deseas
+                }
+            }
+        }
+
+        // Comando de filtro
+        public ICommand FiltrarCommand { get; }
+
+        // --- Tu código original ---
         private string _organization;
         private string _pat;
         private string _proyectoSeleccionado;
@@ -31,7 +84,6 @@ namespace LineaBaseETB_V2.ViewModels
             private set => SetProperty(ref _workItemsView, value);
         }
 
-        // Brushes para bordes
         private Brush _organizationBorderBrush = Brushes.Gray;
         public Brush OrganizationBorderBrush
         {
@@ -119,13 +171,17 @@ namespace LineaBaseETB_V2.ViewModels
             !string.IsNullOrWhiteSpace(ProyectoSeleccionado);
 
         public ICommand ConsultarCommand { get; }
+        public string IdSeleccionado { get; private set; }
 
         public MainViewModel()
         {
             ConsultarCommand = new RelayCommand(async () => await ConsultarWorkItemsAsync(), () => CanConsultar);
 
+            // Inicializa el comando de filtro (corregido para async Task)
+            FiltrarCommand = new RelayCommand(async () => await AplicarFiltros());
+
             WorkItemsView = CollectionViewSource.GetDefaultView(WorkItems);
-            WorkItemsView.Filter = null; // Sin filtro
+            WorkItemsView.Filter = null; // Sin filtro por defecto
         }
 
         private void ClearData()
@@ -210,6 +266,40 @@ namespace LineaBaseETB_V2.ViewModels
             ProyectoBorderBrush = string.IsNullOrWhiteSpace(ProyectoSeleccionado) ? Brushes.Red : Brushes.Gray;
         }
 
+        // Lógica del comando de filtro (corregido a async Task)
+        private async Task AplicarFiltros()
+        {
+            // Aplica el filtro a la vista de WorkItems
+            WorkItemsView.Filter = item =>
+            {
+                var workItem = item as WorkItemModel;
+                if (workItem == null)
+                    return false;
+
+                // Filtrado por Estado
+                bool estadoOk = string.IsNullOrWhiteSpace(EstadoSeleccionado) ||
+                                workItem.State?.Equals(EstadoSeleccionado, StringComparison.OrdinalIgnoreCase) == true;
+
+                // Filtrado por Tipo
+                bool tipoOk = string.IsNullOrWhiteSpace(IdSeleccionado) ||
+                              workItem.Type?.Equals(IdSeleccionado, StringComparison.OrdinalIgnoreCase) == true;
+
+                // Filtrado por Asignado a (puede ser parcial)
+                bool asignadoOk = string.IsNullOrWhiteSpace(AsignadoA) ||
+                                  (workItem.AssignedTo != null &&
+                                   workItem.AssignedTo.IndexOf(AsignadoA, StringComparison.OrdinalIgnoreCase) >= 0);
+
+                // Solo muestra los que cumplen todos los filtros activos
+                return estadoOk && tipoOk && asignadoOk;
+            };
+
+            // Refresca la vista
+            WorkItemsView.Refresh();
+
+            await Task.CompletedTask;
+        }
+
+
         #region INotifyPropertyChanged
 
         public event PropertyChangedEventHandler PropertyChanged;
@@ -230,6 +320,7 @@ namespace LineaBaseETB_V2.ViewModels
         #endregion
     }
 
+    // Tu implementación custom de RelayCommand se mantiene igual
     public class RelayCommand : ICommand
     {
         private readonly Func<Task> _executeAsync;

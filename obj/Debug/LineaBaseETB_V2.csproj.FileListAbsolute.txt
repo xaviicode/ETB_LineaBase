@@ -218,3 +218,9 @@ C:\Users\OscarJavierLopezGome\source\repos\ETB_LineaBase\LineaBaseETB_V2\obj\Deb
 C:\Users\OscarJavierLopezGome\source\repos\ETB_LineaBase\LineaBaseETB_V2\obj\Debug\LineaBaseETB_V2.exe
 C:\Users\OscarJavierLopezGome\source\repos\ETB_LineaBase\LineaBaseETB_V2\obj\Debug\LineaBaseETB_V2.pdb
 C:\Users\OscarJavierLopezGome\source\repos\ETB_LineaBase\LineaBaseETB_V2\obj\Debug\LineaBaseETB_V2.exe.config
+C:\Users\OscarJavierLopezGome\source\repos\ETB_LineaBase\LineaBaseETB_V2\bin\Debug\CommunityToolkit.Mvvm.dll
+C:\Users\OscarJavierLopezGome\source\repos\ETB_LineaBase\LineaBaseETB_V2\bin\Debug\System.ComponentModel.Annotations.dll
+C:\Users\OscarJavierLopezGome\source\repos\ETB_LineaBase\LineaBaseETB_V2\bin\Debug\CommunityToolkit.Mvvm.pdb
+C:\Users\OscarJavierLopezGome\source\repos\ETB_LineaBase\LineaBaseETB_V2\bin\Debug\CommunityToolkit.Mvvm.xml
+C:\Users\OscarJavierLopezGome\source\repos\ETB_LineaBase\LineaBaseETB_V2\obj\Debug\LineaBaseETB_V2.csproj.SuggestedBindingRedirects.cache
+C:\Users\OscarJavierLopezGome\source\repos\ETB_LineaBase\LineaBaseETB_V2\obj\Debug\LineaBaseETB_V2.GeneratedMSBuildEditorConfig.editorconfig
