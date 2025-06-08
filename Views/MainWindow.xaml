@@ -151,16 +151,15 @@
         <ProgressBar Grid.Row="6" Margin="0,241,0,193" IsIndeterminate="True" Visibility="{Binding IsLoading, Converter={StaticResource BooleanToVisibilityConverter}}" />
 
         <!-- Panel de filtros para los Work Items -->
-        <StackPanel Orientation="Horizontal" Margin="10,72,0,10" HorizontalAlignment="Left" Width="510">
+        <StackPanel Orientation="Horizontal" Margin="10,72,0,10" HorizontalAlignment="Left" Width="541">
             <!-- Filtro por Estado -->
             <ComboBox Width="120"
                 ItemsSource="{Binding EstadosDisponibles}"
                 SelectedItem="{Binding EstadoSeleccionado}"
                 Margin="0,0,10,0" Height="20"/>
-            <!-- Filtro por Tipo -->
-            <ComboBox Width="120"
-                 ItemsSource="{Binding TiposDisponibles}"
-                SelectedItem="{Binding TipoSeleccionado}"
+            <!--Filtro por Type Id-->
+            <TextBox Width="150"
+                Text="{Binding AsignadoA}"
                 Margin="0,0,10,0" Height="20"/>
             <!-- Filtro por Asignado a -->
             <TextBox Width="150"

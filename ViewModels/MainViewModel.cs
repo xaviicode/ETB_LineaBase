@@ -1,15 +1,16 @@
-﻿using LineaBaseETB_V2.Models;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Input;
+using LineaBaseETB_V2.Models;
 using LineaBaseETB_V2.Services;
 using System;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
+using System.Security.Cryptography;
 using System.Threading.Tasks;
 using System.Windows.Data;
 using System.Windows.Input;
 using System.Windows.Media;
-using CommunityToolkit.Mvvm.ComponentModel;
-using CommunityToolkit.Mvvm.Input;
 
 namespace LineaBaseETB_V2.ViewModels
 {
@@ -18,7 +19,7 @@ namespace LineaBaseETB_V2.ViewModels
         // Filtros para Work Items
         public ObservableCollection<string> EstadosDisponibles { get; } = new ObservableCollection<string>
         {
-            "Activo", "Cerrado", "Resuelto", "Nuevo"
+            "En revisión Líder Técnico", "En Revisión", "Pendiente Autorización QA", "Rechazado", "En Branch QA", "Desplegado QA", "Autorizado Release", "En Branch Release"
         };
 
         private string _estadoSeleccionado;
@@ -34,26 +35,22 @@ namespace LineaBaseETB_V2.ViewModels
             }
         }
 
-        public ObservableCollection<string> TiposDisponibles { get; } = new ObservableCollection<string>
+        private string _Id;
+        public string AsignadoA
         {
-            "Bug", "Task", "User Story"
-        };
-
-        private string _tipoSeleccionado;
-        public string TipoSeleccionado
-        {
-            get => _tipoSeleccionado;
+            get => _Id;
             set
             {
-                if (SetProperty(ref _tipoSeleccionado, value))
+                if (SetProperty(ref _Id, value))
                 {
                     // Aquí puedes activar filtrado automático si lo deseas
                 }
             }
         }
 
+
         private string _asignadoA;
-        public string AsignadoA
+        public string asignadoA
         {
             get => _asignadoA;
             set
@@ -174,6 +171,7 @@ namespace LineaBaseETB_V2.ViewModels
             !string.IsNullOrWhiteSpace(ProyectoSeleccionado);
 
         public ICommand ConsultarCommand { get; }
+        public string IdSeleccionado { get; private set; }
 
         public MainViewModel()
         {
@@ -271,9 +269,36 @@ namespace LineaBaseETB_V2.ViewModels
         // Lógica del comando de filtro (corregido a async Task)
         private async Task AplicarFiltros()
         {
-            // Aquí irá la lógica de filtrado sobre WorkItemsView en el siguiente incremento.
+            // Aplica el filtro a la vista de WorkItems
+            WorkItemsView.Filter = item =>
+            {
+                var workItem = item as WorkItemModel;
+                if (workItem == null)
+                    return false;
+
+                // Filtrado por Estado
+                bool estadoOk = string.IsNullOrWhiteSpace(EstadoSeleccionado) ||
+                                workItem.State?.Equals(EstadoSeleccionado, StringComparison.OrdinalIgnoreCase) == true;
+
+                // Filtrado por Tipo
+                bool tipoOk = string.IsNullOrWhiteSpace(IdSeleccionado) ||
+                              workItem.Type?.Equals(IdSeleccionado, StringComparison.OrdinalIgnoreCase) == true;
+
+                // Filtrado por Asignado a (puede ser parcial)
+                bool asignadoOk = string.IsNullOrWhiteSpace(AsignadoA) ||
+                                  (workItem.AssignedTo != null &&
+                                   workItem.AssignedTo.IndexOf(AsignadoA, StringComparison.OrdinalIgnoreCase) >= 0);
+
+                // Solo muestra los que cumplen todos los filtros activos
+                return estadoOk && tipoOk && asignadoOk;
+            };
+
+            // Refresca la vista
+            WorkItemsView.Refresh();
+
             await Task.CompletedTask;
         }
+
 
         #region INotifyPropertyChanged
 
