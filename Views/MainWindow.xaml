@@ -151,7 +151,7 @@
         <ProgressBar Grid.Row="6" Margin="0,241,0,193" IsIndeterminate="True" Visibility="{Binding IsLoading, Converter={StaticResource BooleanToVisibilityConverter}}" />
 
         <!-- Panel de filtros para los Work Items -->
-        <StackPanel Orientation="Horizontal" Margin="10,72,0,10" HorizontalAlignment="Left" Width="541">
+        <StackPanel Orientation="Horizontal" Margin="10,72,0,10" HorizontalAlignment="Left" Width="634">
             
             <!-- Filtro por Estado -->
             <ComboBox Width="120"
@@ -173,6 +173,8 @@
             <Button Content="Filtrar"
                 Command="{Binding FiltrarCommand}"
                 Width="80"/>
+
+            <Button Content="Limpiar Filtros" Command="{Binding LimpiarFiltrosCommand}" Margin="5,0,0,0"/>
         </StackPanel>
 
 

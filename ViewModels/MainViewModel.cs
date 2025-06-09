@@ -15,15 +15,18 @@ namespace LineaBaseETB_V2.ViewModels
 {
     public class MainViewModel : INotifyPropertyChanged
     {
-        // Filtros para Work Items
+        // Lista de estados disponibles para el filtro de Estado.
+        // Incluye la opción "Todos" para mostrar todos los Work Items sin filtrar por estado.
         public ObservableCollection<string> EstadosDisponibles { get; } = new ObservableCollection<string>
         {
+            "Todos", // Opción para ver todos los estados
             "En revisión Líder Técnico", "En Revisión", "Pendiente Autorización QA", "Rechazado", "En Branch QA", "Desplegado QA",
             "Autorizado Release", "En Branch Producción", "Desplegado QA-UNO", "Desplegado Release", "Done", "Pendiente despliegue en Urgentes",
             "En Branch QA-UNO",
         };
 
-        private string _estadoSeleccionado;
+        // Estado seleccionado por el usuario en el filtro
+        private string _estadoSeleccionado = "Todos";
         public string EstadoSeleccionado
         {
             get => _estadoSeleccionado;
@@ -31,11 +34,12 @@ namespace LineaBaseETB_V2.ViewModels
             {
                 if (SetProperty(ref _estadoSeleccionado, value))
                 {
-                    // Si quieres filtrado automático al cambiar, puedes llamar aquí a AplicarFiltros()
+                    // Puedes llamar a AplicarFiltros() aquí si quieres filtrado automático
                 }
             }
         }
 
+        // Filtro de ID (permite búsqueda parcial por texto)
         private string _idFiltro;
         public string IdFiltro
         {
@@ -44,11 +48,12 @@ namespace LineaBaseETB_V2.ViewModels
             {
                 if (SetProperty(ref _idFiltro, value))
                 {
-                    // Si quieres filtrado automático al escribir, puedes llamar aquí a AplicarFiltros()
+                    // Puedes llamar a AplicarFiltros() aquí si quieres filtrado automático
                 }
             }
         }
 
+        // Filtro de Iniciativa (permite búsqueda parcial por texto)
         private string _iniciativaFiltro;
         public string IniciativaFiltro
         {
@@ -57,15 +62,19 @@ namespace LineaBaseETB_V2.ViewModels
             {
                 if (SetProperty(ref _iniciativaFiltro, value))
                 {
-                    // Si quieres filtrado automático al escribir, puedes llamar aquí a AplicarFiltros()
+                    // Puedes llamar a AplicarFiltros() aquí si quieres filtrado automático
                 }
             }
         }
 
-        // Comando de filtro
+        // Comando para aplicar los filtros (se enlaza al botón "Filtrar" en la UI)
         public ICommand FiltrarCommand { get; }
 
-        // --- Código original ---
+        // Comando para limpiar todos los filtros (se enlaza al botón "Limpiar Filtros" en la UI)
+        public ICommand LimpiarFiltrosCommand { get; }
+
+        // --- Variables y propiedades para la lógica de Azure DevOps y la UI ---
+
         private string _organization;
         private string _pat;
         private string _proyectoSeleccionado;
@@ -74,9 +83,11 @@ namespace LineaBaseETB_V2.ViewModels
 
         private AzureDevOpsService _azureService;
 
+        // Listas para los proyectos y los Work Items consultados
         public ObservableCollection<string> Proyectos { get; } = new ObservableCollection<string>();
         public ObservableCollection<WorkItemModel> WorkItems { get; } = new ObservableCollection<WorkItemModel>();
 
+        // Vista filtrable de los Work Items (usada por el DataGrid)
         private ICollectionView _workItemsView;
         public ICollectionView WorkItemsView
         {
@@ -84,6 +95,7 @@ namespace LineaBaseETB_V2.ViewModels
             private set => SetProperty(ref _workItemsView, value);
         }
 
+        // Brushes para la validación visual de campos en la UI
         private Brush _organizationBorderBrush = Brushes.Gray;
         public Brush OrganizationBorderBrush
         {
@@ -105,6 +117,7 @@ namespace LineaBaseETB_V2.ViewModels
             set => SetProperty(ref _proyectoBorderBrush, value);
         }
 
+        // Propiedades para los campos de conexión
         public string Organization
         {
             get => _organization;
@@ -164,25 +177,29 @@ namespace LineaBaseETB_V2.ViewModels
             private set => SetProperty(ref _statusMessage, value);
         }
 
+        // Indica si se puede consultar (habilita/deshabilita el botón de consulta)
         public bool CanConsultar =>
             !IsLoading &&
             !string.IsNullOrWhiteSpace(Organization) &&
             !string.IsNullOrWhiteSpace(Pat) &&
             !string.IsNullOrWhiteSpace(ProyectoSeleccionado);
 
+        // Comando para consultar los Work Items desde Azure DevOps
         public ICommand ConsultarCommand { get; }
 
+        // Constructor del ViewModel: inicializa comandos y la vista filtrable
         public MainViewModel()
         {
             ConsultarCommand = new RelayCommand(async () => await ConsultarWorkItemsAsync(), () => CanConsultar);
-
-            // Inicializa el comando de filtro
             FiltrarCommand = new RelayCommand(async () => await AplicarFiltros());
+            RelayCommand relayCommand = new(LimpiarFiltros);
+            LimpiarFiltrosCommand = relayCommand;
 
             WorkItemsView = CollectionViewSource.GetDefaultView(WorkItems);
             WorkItemsView.Filter = null; // Sin filtro por defecto
         }
 
+        // Limpia los datos de proyectos y Work Items
         private void ClearData()
         {
             Proyectos.Clear();
@@ -191,6 +208,7 @@ namespace LineaBaseETB_V2.ViewModels
             StatusMessage = string.Empty;
         }
 
+        // Carga los proyectos desde Azure DevOps
         private async Task LoadProjectsAsync()
         {
             if (string.IsNullOrWhiteSpace(Organization) || string.IsNullOrWhiteSpace(Pat))
@@ -220,6 +238,7 @@ namespace LineaBaseETB_V2.ViewModels
             }
         }
 
+        // Consulta los Work Items del proyecto seleccionado
         private async Task ConsultarWorkItemsAsync()
         {
             if (_azureService == null)
@@ -258,6 +277,7 @@ namespace LineaBaseETB_V2.ViewModels
             }
         }
 
+        // Valida los campos de conexión y actualiza los bordes en la UI
         private void ValidarCampos()
         {
             OrganizationBorderBrush = string.IsNullOrWhiteSpace(Organization) ? Brushes.Red : Brushes.Gray;
@@ -265,7 +285,11 @@ namespace LineaBaseETB_V2.ViewModels
             ProyectoBorderBrush = string.IsNullOrWhiteSpace(ProyectoSeleccionado) ? Brushes.Red : Brushes.Gray;
         }
 
-        // Lógica del comando de filtro
+        /// <summary>
+        /// Aplica los filtros seleccionados a la vista de WorkItems.
+        /// Si el filtro de estado es "Todos" o vacío, no filtra por estado.
+        /// Si los otros filtros están vacíos, tampoco filtra por ellos.
+        /// </summary>
         private async Task AplicarFiltros()
         {
             WorkItemsView.Filter = item =>
@@ -276,6 +300,7 @@ namespace LineaBaseETB_V2.ViewModels
 
                 // Filtrado por Estado
                 bool estadoOk = string.IsNullOrWhiteSpace(EstadoSeleccionado) ||
+                                EstadoSeleccionado == "Todos" ||
                                 (workItem.State?.Equals(EstadoSeleccionado, StringComparison.OrdinalIgnoreCase) == true);
 
                 // Filtrado por ID (permite búsqueda parcial)
@@ -294,6 +319,19 @@ namespace LineaBaseETB_V2.ViewModels
             WorkItemsView.Refresh();
             await Task.CompletedTask;
         }
+
+        /// <summary>
+        /// Limpia todos los filtros y muestra todos los Work Items.
+        /// </summary>
+        private async Task LimpiarFiltros()
+        {
+            EstadoSeleccionado = "Todos";
+            IdFiltro = string.Empty;
+            IniciativaFiltro = string.Empty;
+            FiltrarCommand.Execute(null);
+            await Task.CompletedTask; // Para cumplir con el tipo Task
+        }
+
 
         #region INotifyPropertyChanged
 
@@ -315,7 +353,9 @@ namespace LineaBaseETB_V2.ViewModels
         #endregion
     }
 
-    // Tu implementación custom de RelayCommand se mantiene igual
+    /// <summary>
+    /// Implementación personalizada de RelayCommand para comandos asíncronos.
+    /// </summary>
     public class RelayCommand : ICommand
     {
         private readonly Func<Task> _executeAsync;
