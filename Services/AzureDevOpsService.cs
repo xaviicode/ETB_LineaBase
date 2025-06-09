@@ -67,11 +67,11 @@ namespace LineaBaseETB_V2.Services
             var wiql = new Wiql
             {
                 Query = $@"
-                    SELECT [System.Id] FROM WorkItems 
-                    WHERE [System.TeamProject] = '{proyecto}' 
-                      AND [System.State] <> 'Closed' 
-                      AND [System.CreatedDate] >= @StartOfYear
-                    ORDER BY [System.Id] DESC"
+            SELECT [System.Id] FROM WorkItems 
+            WHERE [System.TeamProject] = '{proyecto}' 
+              AND [System.State] <> 'Closed' 
+              AND [System.CreatedDate] >= @StartOfYear
+            ORDER BY [System.Id] DESC"
             };
 
             var result = await client.QueryByWiqlAsync(wiql);
@@ -82,27 +82,31 @@ namespace LineaBaseETB_V2.Services
             var ids = result.WorkItems.Select(wi => wi.Id).Take(MaxItemsToFetch).ToArray();
 
             var allWorkItems = new List<WorkItemModel>();
-
             var tasks = new List<Task<List<WorkItem>>>();
 
             for (int i = 0; i < ids.Length; i += MaxBatchSize)
             {
                 var batchIds = ids.Skip(i).Take(MaxBatchSize).ToArray();
-                tasks.Add(client.GetWorkItemsAsync(batchIds, fields));
-            }
-
-            var workItemsBatches = await Task.WhenAll(tasks);
-
-            foreach (IList<WorkItem> batch in workItemsBatches)
-            {
-                foreach (var wi in batch)
+                try
                 {
-                    allWorkItems.Add(MapWorkItemToModel(wi));
+                    // Intenta obtener el batch de Work Items
+                    var batch = await client.GetWorkItemsAsync(batchIds, fields);
+                    foreach (var wi in batch)
+                    {
+                        allWorkItems.Add(MapWorkItemToModel(wi));
+                    }
+                }
+                catch (Exception ex)
+                {
+                    // Registra el error y continúa con el siguiente batch
+                    // Puedes usar un logger o simplemente imprimir en consola/log de la app
+                    Console.WriteLine($"Error al obtener el batch de Work Items (IDs: {string.Join(",", batchIds)}): {ex.Message}");
                 }
             }
 
             return allWorkItems;
         }
+
 
         private WorkItemModel MapWorkItemToModel(WorkItem wi)
         {
