@@ -3,8 +3,10 @@ using CommunityToolkit.Mvvm.Input;
 using LineaBaseETB_V2.Models;
 using LineaBaseETB_V2.Services;
 using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
+using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using System.Windows.Data;
@@ -15,11 +17,10 @@ namespace LineaBaseETB_V2.ViewModels
 {
     public class MainViewModel : INotifyPropertyChanged
     {
-        // Lista de estados disponibles para el filtro de Estado.
-        // Incluye la opción "Todos" para mostrar todos los Work Items sin filtrar por estado.
+        // Lista de estados disponibles para el filtro de Estado (puedes ajustarla según tus necesidades)
         public ObservableCollection<string> EstadosDisponibles { get; } = new ObservableCollection<string>
         {
-            "Todos", // Opción para ver todos los estados
+            "Todos",
             "En revisión Líder Técnico", "En Revisión", "Pendiente Autorización QA", "Rechazado", "En Branch QA", "Desplegado QA",
             "Autorizado Release", "En Branch Producción", "Desplegado QA-UNO", "Desplegado Release", "Done", "Pendiente despliegue en Urgentes",
             "En Branch QA-UNO",
@@ -77,7 +78,6 @@ namespace LineaBaseETB_V2.ViewModels
 
         private string _organization;
         private string _pat;
-        private string _proyectoSeleccionado;
         private bool _isLoading;
         private string _statusMessage;
 
@@ -86,6 +86,9 @@ namespace LineaBaseETB_V2.ViewModels
         // Listas para los proyectos y los Work Items consultados
         public ObservableCollection<string> Proyectos { get; } = new ObservableCollection<string>();
         public ObservableCollection<WorkItemModel> WorkItems { get; } = new ObservableCollection<WorkItemModel>();
+
+        // Lista interna de proyectos seleccionados (en este caso, siempre serán todos)
+        private List<string> _proyectosSeleccionados = new List<string>();
 
         // Vista filtrable de los Work Items (usada por el DataGrid)
         private ICollectionView _workItemsView;
@@ -108,13 +111,6 @@ namespace LineaBaseETB_V2.ViewModels
         {
             get => _patBorderBrush;
             set => SetProperty(ref _patBorderBrush, value);
-        }
-
-        private Brush _proyectoBorderBrush = Brushes.Gray;
-        public Brush ProyectoBorderBrush
-        {
-            get => _proyectoBorderBrush;
-            set => SetProperty(ref _proyectoBorderBrush, value);
         }
 
         // Propiedades para los campos de conexión
@@ -148,19 +144,6 @@ namespace LineaBaseETB_V2.ViewModels
             }
         }
 
-        public string ProyectoSeleccionado
-        {
-            get => _proyectoSeleccionado;
-            set
-            {
-                if (SetProperty(ref _proyectoSeleccionado, value))
-                {
-                    ValidarCampos();
-                    ((RelayCommand)ConsultarCommand).RaiseCanExecuteChanged();
-                }
-            }
-        }
-
         public bool IsLoading
         {
             get => _isLoading;
@@ -181,8 +164,7 @@ namespace LineaBaseETB_V2.ViewModels
         public bool CanConsultar =>
             !IsLoading &&
             !string.IsNullOrWhiteSpace(Organization) &&
-            !string.IsNullOrWhiteSpace(Pat) &&
-            !string.IsNullOrWhiteSpace(ProyectoSeleccionado);
+            !string.IsNullOrWhiteSpace(Pat);
 
         // Comando para consultar los Work Items desde Azure DevOps
         public ICommand ConsultarCommand { get; }
@@ -192,8 +174,7 @@ namespace LineaBaseETB_V2.ViewModels
         {
             ConsultarCommand = new RelayCommand(async () => await ConsultarWorkItemsAsync(), () => CanConsultar);
             FiltrarCommand = new RelayCommand(async () => await AplicarFiltros());
-            RelayCommand relayCommand = new(LimpiarFiltros);
-            LimpiarFiltrosCommand = relayCommand;
+            LimpiarFiltrosCommand = new RelayCommand(async () => await LimpiarFiltros());
 
             WorkItemsView = CollectionViewSource.GetDefaultView(WorkItems);
             WorkItemsView.Filter = null; // Sin filtro por defecto
@@ -204,11 +185,10 @@ namespace LineaBaseETB_V2.ViewModels
         {
             Proyectos.Clear();
             WorkItems.Clear();
-            ProyectoSeleccionado = null;
             StatusMessage = string.Empty;
         }
 
-        // Carga los proyectos desde Azure DevOps
+        // Carga todos los proyectos automáticamente después de ingresar PAT y organización
         private async Task LoadProjectsAsync()
         {
             if (string.IsNullOrWhiteSpace(Organization) || string.IsNullOrWhiteSpace(Pat))
@@ -226,6 +206,9 @@ namespace LineaBaseETB_V2.ViewModels
                 foreach (var p in proyectos)
                     Proyectos.Add(p);
 
+                // Selecciona todos los proyectos automáticamente
+                _proyectosSeleccionados = proyectos.ToList();
+
                 StatusMessage = $"Se cargaron {Proyectos.Count} proyectos.";
             }
             catch (Exception ex)
@@ -238,7 +221,7 @@ namespace LineaBaseETB_V2.ViewModels
             }
         }
 
-        // Consulta los Work Items del proyecto seleccionado
+        // Consulta los Work Items de todos los proyectos seleccionados automáticamente
         private async Task ConsultarWorkItemsAsync()
         {
             if (_azureService == null)
@@ -247,25 +230,29 @@ namespace LineaBaseETB_V2.ViewModels
                 return;
             }
 
-            if (string.IsNullOrWhiteSpace(ProyectoSeleccionado))
+            if (_proyectosSeleccionados == null || _proyectosSeleccionados.Count == 0)
             {
-                StatusMessage = "Seleccione un proyecto.";
+                StatusMessage = "No hay proyectos disponibles para consultar.";
                 return;
             }
 
             try
             {
                 IsLoading = true;
-                StatusMessage = "Consultando Work Items...";
+                StatusMessage = "Consultando Work Items de todos los proyectos...";
 
                 WorkItems.Clear();
 
-                var items = await _azureService.ObtenerWorkItemsAsync(ProyectoSeleccionado);
+                foreach (var proyecto in _proyectosSeleccionados)
+                {
+                    StatusMessage = $"Consultando {proyecto}...";
+                    var items = await _azureService.ObtenerWorkItemsAsync(proyecto);
 
-                foreach (var wi in items)
-                    WorkItems.Add(wi);
+                    foreach (var wi in items)
+                        WorkItems.Add(wi);
+                }
 
-                StatusMessage = $"Se obtuvieron {WorkItems.Count} Work Items.";
+                StatusMessage = $"Se obtuvieron {WorkItems.Count} Work Items de {Proyectos.Count} proyectos.";
             }
             catch (Exception ex)
             {
@@ -282,7 +269,6 @@ namespace LineaBaseETB_V2.ViewModels
         {
             OrganizationBorderBrush = string.IsNullOrWhiteSpace(Organization) ? Brushes.Red : Brushes.Gray;
             PatBorderBrush = string.IsNullOrWhiteSpace(Pat) ? Brushes.Red : Brushes.Gray;
-            ProyectoBorderBrush = string.IsNullOrWhiteSpace(ProyectoSeleccionado) ? Brushes.Red : Brushes.Gray;
         }
 
         /// <summary>
@@ -328,10 +314,8 @@ namespace LineaBaseETB_V2.ViewModels
             EstadoSeleccionado = "Todos";
             IdFiltro = string.Empty;
             IniciativaFiltro = string.Empty;
-            FiltrarCommand.Execute(null);
-            await Task.CompletedTask; // Para cumplir con el tipo Task
+            await AplicarFiltros();
         }
-
 
         #region INotifyPropertyChanged
 

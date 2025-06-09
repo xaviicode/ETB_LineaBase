@@ -41,8 +41,9 @@ namespace LineaBaseETB_V2.Services
             "Custom.Fecha_PnP"
         };
 
-        private const int MaxBatchSize = 100;
-        private const int MaxItemsToFetch = 500;
+        private const int MaxBatchSize = 200;  // Tamaño recomendado por 
+        private const int MaxItemsToFetch = 20000; // Límite máximo permitido 
+
 
         public AzureDevOpsService(string organization, string personalAccessToken)
         {
