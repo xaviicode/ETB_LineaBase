@@ -6,7 +6,6 @@ using System;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
-using System.Security.Cryptography;
 using System.Threading.Tasks;
 using System.Windows.Data;
 using System.Windows.Input;
@@ -19,7 +18,9 @@ namespace LineaBaseETB_V2.ViewModels
         // Filtros para Work Items
         public ObservableCollection<string> EstadosDisponibles { get; } = new ObservableCollection<string>
         {
-            "En revisión Líder Técnico", "En Revisión", "Pendiente Autorización QA", "Rechazado", "En Branch QA", "Desplegado QA", "Autorizado Release", "En Branch Release"
+            "En revisión Líder Técnico", "En Revisión", "Pendiente Autorización QA", "Rechazado", "En Branch QA", "Desplegado QA",
+            "Autorizado Release", "En Branch Producción", "Desplegado QA-UNO", "Desplegado Release", "Done", "Pendiente despliegue en Urgentes",
+            "En Branch QA-UNO",
         };
 
         private string _estadoSeleccionado;
@@ -30,34 +31,33 @@ namespace LineaBaseETB_V2.ViewModels
             {
                 if (SetProperty(ref _estadoSeleccionado, value))
                 {
-                    // Aquí puedes activar filtrado automático si lo deseas
+                    // Si quieres filtrado automático al cambiar, puedes llamar aquí a AplicarFiltros()
                 }
             }
         }
 
-        private string _Id;
-        public string AsignadoA
+        private string _idFiltro;
+        public string IdFiltro
         {
-            get => _Id;
+            get => _idFiltro;
             set
             {
-                if (SetProperty(ref _Id, value))
+                if (SetProperty(ref _idFiltro, value))
                 {
-                    // Aquí puedes activar filtrado automático si lo deseas
+                    // Si quieres filtrado automático al escribir, puedes llamar aquí a AplicarFiltros()
                 }
             }
         }
 
-
-        private string _asignadoA;
-        public string asignadoA
+        private string _iniciativaFiltro;
+        public string IniciativaFiltro
         {
-            get => _asignadoA;
+            get => _iniciativaFiltro;
             set
             {
-                if (SetProperty(ref _asignadoA, value))
+                if (SetProperty(ref _iniciativaFiltro, value))
                 {
-                    // Aquí puedes activar filtrado automático si lo deseas
+                    // Si quieres filtrado automático al escribir, puedes llamar aquí a AplicarFiltros()
                 }
             }
         }
@@ -65,7 +65,7 @@ namespace LineaBaseETB_V2.ViewModels
         // Comando de filtro
         public ICommand FiltrarCommand { get; }
 
-        // --- Tu código original ---
+        // --- Código original ---
         private string _organization;
         private string _pat;
         private string _proyectoSeleccionado;
@@ -171,13 +171,12 @@ namespace LineaBaseETB_V2.ViewModels
             !string.IsNullOrWhiteSpace(ProyectoSeleccionado);
 
         public ICommand ConsultarCommand { get; }
-        public string IdSeleccionado { get; private set; }
 
         public MainViewModel()
         {
             ConsultarCommand = new RelayCommand(async () => await ConsultarWorkItemsAsync(), () => CanConsultar);
 
-            // Inicializa el comando de filtro (corregido para async Task)
+            // Inicializa el comando de filtro
             FiltrarCommand = new RelayCommand(async () => await AplicarFiltros());
 
             WorkItemsView = CollectionViewSource.GetDefaultView(WorkItems);
@@ -266,10 +265,9 @@ namespace LineaBaseETB_V2.ViewModels
             ProyectoBorderBrush = string.IsNullOrWhiteSpace(ProyectoSeleccionado) ? Brushes.Red : Brushes.Gray;
         }
 
-        // Lógica del comando de filtro (corregido a async Task)
+        // Lógica del comando de filtro
         private async Task AplicarFiltros()
         {
-            // Aplica el filtro a la vista de WorkItems
             WorkItemsView.Filter = item =>
             {
                 var workItem = item as WorkItemModel;
@@ -278,27 +276,24 @@ namespace LineaBaseETB_V2.ViewModels
 
                 // Filtrado por Estado
                 bool estadoOk = string.IsNullOrWhiteSpace(EstadoSeleccionado) ||
-                                workItem.State?.Equals(EstadoSeleccionado, StringComparison.OrdinalIgnoreCase) == true;
+                                (workItem.State?.Equals(EstadoSeleccionado, StringComparison.OrdinalIgnoreCase) == true);
 
-                // Filtrado por Tipo
-                bool tipoOk = string.IsNullOrWhiteSpace(IdSeleccionado) ||
-                              workItem.Type?.Equals(IdSeleccionado, StringComparison.OrdinalIgnoreCase) == true;
+                // Filtrado por ID (permite búsqueda parcial)
+                bool idOk = string.IsNullOrWhiteSpace(IdFiltro) ||
+                            (workItem.Id.ToString().IndexOf(IdFiltro, StringComparison.OrdinalIgnoreCase) >= 0);
 
-                // Filtrado por Asignado a (puede ser parcial)
-                bool asignadoOk = string.IsNullOrWhiteSpace(AsignadoA) ||
-                                  (workItem.AssignedTo != null &&
-                                   workItem.AssignedTo.IndexOf(AsignadoA, StringComparison.OrdinalIgnoreCase) >= 0);
+                // Filtrado por Iniciativa (permite búsqueda parcial)
+                bool iniciativaOk = string.IsNullOrWhiteSpace(IniciativaFiltro) ||
+                                    (!string.IsNullOrEmpty(workItem.NumeroIniciativa) &&
+                                     workItem.NumeroIniciativa.IndexOf(IniciativaFiltro, StringComparison.OrdinalIgnoreCase) >= 0);
 
                 // Solo muestra los que cumplen todos los filtros activos
-                return estadoOk && tipoOk && asignadoOk;
+                return estadoOk && idOk && iniciativaOk;
             };
 
-            // Refresca la vista
             WorkItemsView.Refresh();
-
             await Task.CompletedTask;
         }
-
 
         #region INotifyPropertyChanged
 

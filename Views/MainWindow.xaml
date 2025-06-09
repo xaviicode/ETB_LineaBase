@@ -152,19 +152,23 @@
 
         <!-- Panel de filtros para los Work Items -->
         <StackPanel Orientation="Horizontal" Margin="10,72,0,10" HorizontalAlignment="Left" Width="541">
+            
             <!-- Filtro por Estado -->
             <ComboBox Width="120"
                 ItemsSource="{Binding EstadosDisponibles}"
                 SelectedItem="{Binding EstadoSeleccionado}"
                 Margin="0,0,10,0" Height="20"/>
+            
             <!--Filtro por Type Id-->
             <TextBox Width="150"
-                Text="{Binding AsignadoA}"
+                Text="{Binding IdFiltro}"
                 Margin="0,0,10,0" Height="20"/>
+            
             <!-- Filtro por Asignado a -->
             <TextBox Width="150"
-                Text="{Binding AsignadoA}"
+                Text="{Binding IniciativaFiltro}"
                 Margin="0,0,10,0" Height="20"/>
+            
             <!-- Botón para aplicar filtros -->
             <Button Content="Filtrar"
                 Command="{Binding FiltrarCommand}"

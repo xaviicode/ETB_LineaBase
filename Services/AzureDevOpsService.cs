@@ -21,10 +21,10 @@ namespace LineaBaseETB_V2.Services
         {
             "System.Id",                  // AGREGADO para filtros
             "System.Title",
-            "System.State",
+            "System.State",               // AGREGADO para filtros
             "System.WorkItemType",        // AGREGADO para filtros
-            "System.AssignedTo",          //
-            "Custom.NumeroIniciativa",
+            "System.AssignedTo",         
+            "Custom.NumeroIniciativa",   // AGREGADO para filtros 
             "Custom.Sistema_1",
             "Custom.Sistema_2",
             "Custom.Sistema_3",
