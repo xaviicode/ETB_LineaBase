@@ -20,6 +20,10 @@ namespace LineaBaseETB_V2.ViewModels
         // Lista dinámica de estados disponibles para el filtro de Estado
         public ObservableCollection<string> EstadosDisponibles { get; } = new ObservableCollection<string>();
 
+        // Historial de filtros de ID e Iniciativa para autocompletado
+        public ObservableCollection<string> IdHistorial { get; } = new ObservableCollection<string>();
+        public ObservableCollection<string> IniciativaHistorial { get; } = new ObservableCollection<string>();
+
         // Estado seleccionado por el usuario en el filtro
         private string _estadoSeleccionado = "Todos";
         public string EstadoSeleccionado
@@ -28,7 +32,7 @@ namespace LineaBaseETB_V2.ViewModels
             set => SetProperty(ref _estadoSeleccionado, value);
         }
 
-        // Filtro de ID (permite búsqueda parcial por texto)
+        // Filtro de ID (permite búsqueda parcial por texto y autocompletado)
         private string _idFiltro;
         public string IdFiltro
         {
@@ -36,7 +40,7 @@ namespace LineaBaseETB_V2.ViewModels
             set => SetProperty(ref _idFiltro, value);
         }
 
-        // Filtro de Iniciativa (entrada libre en TextBox)
+        // Filtro de Iniciativa (permite búsqueda parcial por texto y autocompletado)
         private string _iniciativaFiltro;
         public string IniciativaFiltro
         {
@@ -269,6 +273,7 @@ namespace LineaBaseETB_V2.ViewModels
         /// Aplica los filtros seleccionados a la vista de WorkItems.
         /// Si el filtro de estado es "Todos" o vacío, no filtra por estado.
         /// Si los otros filtros están vacíos, tampoco filtra por ellos.
+        /// Además, guarda los valores consultados en el historial.
         /// </summary>
         private async Task AplicarFiltros()
         {
@@ -295,6 +300,14 @@ namespace LineaBaseETB_V2.ViewModels
                 // Solo muestra los que cumplen todos los filtros activos
                 return estadoOk && idOk && iniciativaOk;
             };
+
+            // Guarda el ID consultado si no está vacío y no existe ya en el historial
+            if (!string.IsNullOrWhiteSpace(IdFiltro) && !IdHistorial.Contains(IdFiltro))
+                IdHistorial.Insert(0, IdFiltro);
+
+            // Guarda la iniciativa consultada si no está vacía y no existe ya en el historial
+            if (!string.IsNullOrWhiteSpace(IniciativaFiltro) && !IniciativaHistorial.Contains(IniciativaFiltro))
+                IniciativaHistorial.Insert(0, IniciativaFiltro);
 
             WorkItemsView.Refresh();
             await Task.CompletedTask;

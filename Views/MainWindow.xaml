@@ -149,17 +149,23 @@
                 SelectedItem="{Binding EstadoSeleccionado}"
                 Margin="0,0,10,0" Height="20"/>
 
-            <!--Filtro por Type Id-->
-            <TextBox Width="150"
-                Text="{Binding IdFiltro}"
-                Margin="0,0,10,0" Height="20"/>
+            <!-- Filtro por ID con autocompletado -->
+            <ComboBox Width="150"
+              IsEditable="True"
+              ItemsSource="{Binding IdHistorial}"
+              Text="{Binding IdFiltro, UpdateSourceTrigger=PropertyChanged}"
+              Margin="0,0,10,0"
+              Height="20"
+              ToolTip="Escribe parte o todo el ID para filtrar" />
 
-            <!-- Filtro por Iniciativa (dinámico, ahora ComboBox) -->
-            <TextBox Width="150"
-                Text="{Binding IniciativaFiltro, UpdateSourceTrigger=PropertyChanged}"
-                Margin="0,0,10,0"
-                Height="20"
-                ToolTip="Escribe parte o todo el número de iniciativa para filtrar" />
+            <!-- Filtro por Iniciativa con autocompletado -->
+            <ComboBox Width="150"
+              IsEditable="True"
+              ItemsSource="{Binding IniciativaHistorial}"
+              Text="{Binding IniciativaFiltro, UpdateSourceTrigger=PropertyChanged}"
+              Margin="0,0,10,0"
+              Height="20"
+              ToolTip="Escribe parte o todo el número de iniciativa para filtrar" />
 
             <!-- Botón para aplicar filtros -->
             <Button Content="Filtrar"
