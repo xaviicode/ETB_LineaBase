@@ -1,6 +1,13 @@
 
 # LineaBaseETB_V2
 
+[![Build Status](https://img.shields.io/github/actions/workflow/status/xaviicode/ETB_LineaBase/dotnet.yml?branch=main&style=for-the-badge)](https://github.com/xaviicode/ETB_LineaBase/actions)
+[![Issues](https://img.shields.io/github/issues/xaviicode/ETB_LineaBase?style=for-the-badge)](https://github.com/xaviicode/ETB_LineaBase/issues)
+[![Forks](https://img.shields.io/github/forks/xaviicode/ETB_LineaBase?style=for-the-badge)](https://github.com/xaviicode/ETB_LineaBase/network/members)
+[![Stars](https://img.shields.io/github/stars/xaviicode/ETB_LineaBase?style=for-the-badge)](https://github.com/xaviicode/ETB_LineaBase/stargazers)
+[![License](https://img.shields.io/github/license/xaviicode/ETB_LineaBase?style=for-the-badge)](https://github.com/xaviicode/ETB_LineaBase/blob/main/LICENSE)
+
+
 Aplicación de escritorio WPF para consultar y validar Work Items en Azure DevOps de forma segura y eficiente, sin depender de scripts externos.
 
 ## Características principales
@@ -101,5 +108,54 @@ MIT
 - MVP funcional y estable
 - Base técnica sólida y escalable
 - Listo para pruebas de usuario
+
+---
+---
+---
+
+#mejoras Primera edición 
+- ##Carga dinámica de valores de filtro: Cambio del tipo de filtrado, es decir que este se pueda hacer de manera masiva todos los proyectos,
+ y que se pueda consultar por iniciativa de manera general.
+
+---
+
+## 📊 Estadísticas y Estado Actual del Proyecto
+
+| Métrica                       | Valor estimado              |
+|-------------------------------|-----------------------------|
+| **Proyectos consultados**     | Todos los de la organización|
+| **Work Items soportados**     | Hasta 20,000 por proyecto   |
+| **Filtros**                   | Estado, ID, Iniciativa      |
+| **Autocompletado**            | Sí, en ID e Iniciativa      |
+| **Historial de consultas**    | Sí, por sesión              |
+| **Extracción masiva**         | Sí, multi-proyecto          |
+| **Próximas mejoras**          | Agrupación visual, exportar, paginación |
+
+---
+
+### 🚀 Funcionalidad principal
+
+- **Consulta masiva:**  
+  Extrae y visualiza Work Items de todos los proyectos de Azure DevOps de la organización en una sola consulta.
+- **Filtros avanzados y dinámicos:**  
+  Estado, ID e Iniciativa generados dinámicamente.
+- **Autocompletado inteligente:**  
+  Filtros de ID e Iniciativa con historial de búsquedas.
+- **Limpieza de filtros:**  
+  Restaura todos los resultados al instante.
+
+---
+
+### 🌟 Impacto para el equipo
+
+- **Ahorro de tiempo:**  
+  Filtra y encuentra información relevante en segundos.
+- **Mejor toma de decisiones:**  
+  Visibilidad transversal y filtros avanzados.
+- **Escalabilidad:**  
+  Preparado para crecer en volumen y funcionalidad.
+
+
+
 
 
