@@ -17,24 +17,15 @@ namespace LineaBaseETB_V2.ViewModels
 {
     public class MainViewModel : INotifyPropertyChanged
     {
-        // Lista de estados disponibles para el filtro de Estado (puedes ajustarla según tus necesidades)
+        // Lista dinámica de estados disponibles para el filtro de Estado
         public ObservableCollection<string> EstadosDisponibles { get; } = new ObservableCollection<string>();
-        public ObservableCollection<string> IniciativasDisponibles { get; } = new ObservableCollection<string>();
-
-
 
         // Estado seleccionado por el usuario en el filtro
         private string _estadoSeleccionado = "Todos";
         public string EstadoSeleccionado
         {
             get => _estadoSeleccionado;
-            set
-            {
-                if (SetProperty(ref _estadoSeleccionado, value))
-                {
-                    // Puedes llamar a AplicarFiltros() aquí si quieres filtrado automático
-                }
-            }
+            set => SetProperty(ref _estadoSeleccionado, value);
         }
 
         // Filtro de ID (permite búsqueda parcial por texto)
@@ -42,27 +33,15 @@ namespace LineaBaseETB_V2.ViewModels
         public string IdFiltro
         {
             get => _idFiltro;
-            set
-            {
-                if (SetProperty(ref _idFiltro, value))
-                {
-                    // Puedes llamar a AplicarFiltros() aquí si quieres filtrado automático
-                }
-            }
+            set => SetProperty(ref _idFiltro, value);
         }
 
-        // Filtro de Iniciativa (permite búsqueda parcial por texto)
+        // Filtro de Iniciativa (entrada libre en TextBox)
         private string _iniciativaFiltro;
         public string IniciativaFiltro
         {
             get => _iniciativaFiltro;
-            set
-            {
-                if (SetProperty(ref _iniciativaFiltro, value))
-                {
-                    // Puedes llamar a AplicarFiltros() aquí si quieres filtrado automático
-                }
-            }
+            set => SetProperty(ref _iniciativaFiltro, value);
         }
 
         // Comando para aplicar los filtros (se enlaza al botón "Filtrar" en la UI)
@@ -250,9 +229,8 @@ namespace LineaBaseETB_V2.ViewModels
                 }
 
                 StatusMessage = $"Se obtuvieron {WorkItems.Count} Work Items de {Proyectos.Count} proyectos.";
-                ActualizarValoresFiltros();
+                ActualizarValoresFiltros(); // Actualiza los filtros dinámicos después de cargar los datos
             }
-
             catch (Exception ex)
             {
                 StatusMessage = $"Error al consultar Work Items: {ex.Message}";
@@ -271,14 +249,11 @@ namespace LineaBaseETB_V2.ViewModels
         }
 
         /// <summary>
-        /// Actualiza dinámicamente los valores de los filtros Estado e Iniciativa
-        /// según los Work Items cargados.
+        /// Actualiza dinámicamente los valores de los filtros Estado según los Work Items cargados.
         /// </summary>
         private void ActualizarValoresFiltros()
         {
-            // Limpia las listas actuales
             EstadosDisponibles.Clear();
-            IniciativasDisponibles.Clear();
 
             // Extrae valores únicos y ordenados de los Work Items cargados
             var estados = WorkItems.Select(wi => wi.State)
@@ -286,19 +261,9 @@ namespace LineaBaseETB_V2.ViewModels
                                    .Distinct()
                                    .OrderBy(s => s);
 
-            var iniciativas = WorkItems.Select(wi => wi.NumeroIniciativa)
-                                       .Where(s => !string.IsNullOrWhiteSpace(s))
-                                       .Distinct()
-                                       .OrderBy(s => s);
-
-            // Llena las listas dinámicas
             foreach (var estado in estados)
                 EstadosDisponibles.Add(estado);
-
-            foreach (var iniciativa in iniciativas)
-                IniciativasDisponibles.Add(iniciativa);
         }
-
 
         /// <summary>
         /// Aplica los filtros seleccionados a la vista de WorkItems.
@@ -322,7 +287,7 @@ namespace LineaBaseETB_V2.ViewModels
                 bool idOk = string.IsNullOrWhiteSpace(IdFiltro) ||
                             (workItem.Id.ToString().IndexOf(IdFiltro, StringComparison.OrdinalIgnoreCase) >= 0);
 
-                // Filtrado por Iniciativa (permite búsqueda parcial)
+                // Filtrado por Iniciativa (búsqueda parcial, insensible a mayúsculas/minúsculas)
                 bool iniciativaOk = string.IsNullOrWhiteSpace(IniciativaFiltro) ||
                                     (!string.IsNullOrEmpty(workItem.NumeroIniciativa) &&
                                      workItem.NumeroIniciativa.IndexOf(IniciativaFiltro, StringComparison.OrdinalIgnoreCase) >= 0);

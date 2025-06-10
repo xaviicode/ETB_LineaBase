@@ -155,10 +155,11 @@
                 Margin="0,0,10,0" Height="20"/>
 
             <!-- Filtro por Iniciativa (dinámico, ahora ComboBox) -->
-            <ComboBox Width="150"
-                ItemsSource="{Binding IniciativasDisponibles}"
-                SelectedItem="{Binding IniciativaSeleccionada}"
-                Margin="0,0,10,0" Height="20"/>
+            <TextBox Width="150"
+                Text="{Binding IniciativaFiltro, UpdateSourceTrigger=PropertyChanged}"
+                Margin="0,0,10,0"
+                Height="20"
+                ToolTip="Escribe parte o todo el número de iniciativa para filtrar" />
 
             <!-- Botón para aplicar filtros -->
             <Button Content="Filtrar"
