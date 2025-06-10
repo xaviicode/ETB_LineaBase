@@ -128,16 +128,6 @@
                          ToolTip="Introduce tu token de acceso personal (PAT)" />
         </StackPanel>
 
-        <!-- Proyecto -->
-        <StackPanel Orientation="Horizontal" Grid.Row="3" VerticalAlignment="Center" Height="22">
-            <TextBlock Text="Proyecto:" Width="150" VerticalAlignment="Center" FontWeight="Bold" Foreground="{StaticResource ETBAzulFuerteBrush}" />
-            <ComboBox ItemsSource="{Binding Proyectos}" SelectedItem="{Binding ProyectoSeleccionado}" 
-                      Width="300"
-                      BorderBrush="{Binding ProyectoBorderBrush}" BorderThickness="1"
-                      IsEnabled="{Binding IsLoading, Converter={StaticResource InverseBooleanConverter}}"
-                      ToolTip="Selecciona el proyecto de Azure DevOps" />
-        </StackPanel>
-
         <!-- Botón Consultar -->
         <Button Content="Consultar Work Items" Command="{Binding ConsultarCommand}" 
                 Grid.Row="5" Width="144" Height="37"
@@ -153,7 +143,7 @@
         <!-- Panel de filtros para los Work Items -->
         <StackPanel Orientation="Horizontal" Margin="10,72,0,10" HorizontalAlignment="Left" Width="634">
 
-            <!-- Filtro por Estado -->
+            <!-- Filtro por Estado (dinámico) -->
             <ComboBox Width="120"
                 ItemsSource="{Binding EstadosDisponibles}"
                 SelectedItem="{Binding EstadoSeleccionado}"
@@ -164,9 +154,10 @@
                 Text="{Binding IdFiltro}"
                 Margin="0,0,10,0" Height="20"/>
 
-            <!-- Filtro por Asignado a -->
-            <TextBox Width="150"
-                Text="{Binding IniciativaFiltro}"
+            <!-- Filtro por Iniciativa (dinámico, ahora ComboBox) -->
+            <ComboBox Width="150"
+                ItemsSource="{Binding IniciativasDisponibles}"
+                SelectedItem="{Binding IniciativaSeleccionada}"
                 Margin="0,0,10,0" Height="20"/>
 
             <!-- Botón para aplicar filtros -->
@@ -176,7 +167,6 @@
 
             <Button Content="Limpiar Filtros" Command="{Binding LimpiarFiltrosCommand}" Margin="5,0,0,0"/>
         </StackPanel>
-
 
         <!-- DataGrid para mostrar Work Items -->
         <DataGrid ItemsSource="{Binding WorkItemsView}" AutoGenerateColumns="False" IsReadOnly="True" Grid.Row="6" Margin="0,76,0,67">

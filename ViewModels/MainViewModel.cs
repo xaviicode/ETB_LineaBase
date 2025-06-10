@@ -18,13 +18,10 @@ namespace LineaBaseETB_V2.ViewModels
     public class MainViewModel : INotifyPropertyChanged
     {
         // Lista de estados disponibles para el filtro de Estado (puedes ajustarla según tus necesidades)
-        public ObservableCollection<string> EstadosDisponibles { get; } = new ObservableCollection<string>
-        {
-            "Todos",
-            "En revisión Líder Técnico", "En Revisión", "Pendiente Autorización QA", "Rechazado", "En Branch QA", "Desplegado QA",
-            "Autorizado Release", "En Branch Producción", "Desplegado QA-UNO", "Desplegado Release", "Done", "Pendiente despliegue en Urgentes",
-            "En Branch QA-UNO",
-        };
+        public ObservableCollection<string> EstadosDisponibles { get; } = new ObservableCollection<string>();
+        public ObservableCollection<string> IniciativasDisponibles { get; } = new ObservableCollection<string>();
+
+
 
         // Estado seleccionado por el usuario en el filtro
         private string _estadoSeleccionado = "Todos";
@@ -253,7 +250,9 @@ namespace LineaBaseETB_V2.ViewModels
                 }
 
                 StatusMessage = $"Se obtuvieron {WorkItems.Count} Work Items de {Proyectos.Count} proyectos.";
+                ActualizarValoresFiltros();
             }
+
             catch (Exception ex)
             {
                 StatusMessage = $"Error al consultar Work Items: {ex.Message}";
@@ -270,6 +269,36 @@ namespace LineaBaseETB_V2.ViewModels
             OrganizationBorderBrush = string.IsNullOrWhiteSpace(Organization) ? Brushes.Red : Brushes.Gray;
             PatBorderBrush = string.IsNullOrWhiteSpace(Pat) ? Brushes.Red : Brushes.Gray;
         }
+
+        /// <summary>
+        /// Actualiza dinámicamente los valores de los filtros Estado e Iniciativa
+        /// según los Work Items cargados.
+        /// </summary>
+        private void ActualizarValoresFiltros()
+        {
+            // Limpia las listas actuales
+            EstadosDisponibles.Clear();
+            IniciativasDisponibles.Clear();
+
+            // Extrae valores únicos y ordenados de los Work Items cargados
+            var estados = WorkItems.Select(wi => wi.State)
+                                   .Where(s => !string.IsNullOrWhiteSpace(s))
+                                   .Distinct()
+                                   .OrderBy(s => s);
+
+            var iniciativas = WorkItems.Select(wi => wi.NumeroIniciativa)
+                                       .Where(s => !string.IsNullOrWhiteSpace(s))
+                                       .Distinct()
+                                       .OrderBy(s => s);
+
+            // Llena las listas dinámicas
+            foreach (var estado in estados)
+                EstadosDisponibles.Add(estado);
+
+            foreach (var iniciativa in iniciativas)
+                IniciativasDisponibles.Add(iniciativa);
+        }
+
 
         /// <summary>
         /// Aplica los filtros seleccionados a la vista de WorkItems.
