@@ -16,15 +16,15 @@ namespace LineaBaseETB_V2.Services
         private readonly Uri _uri;
         private readonly VssBasicCredential _credentials;
 
-        // Campos que se consultan en Azure DevOps (agregados Type y AssignedTo)
+        // Campos a consultar, ajusta según tus necesidades
         private readonly string[] fields = new[]
         {
-            "System.Id",                  // AGREGADO para filtros
+            "System.Id",
             "System.Title",
-            "System.State",               // AGREGADO para filtros
-            "System.WorkItemType",        // AGREGADO para filtros
-            "System.AssignedTo",         
-            "Custom.NumeroIniciativa",   // AGREGADO para filtros 
+            "System.State",
+            "System.WorkItemType",
+            "System.AssignedTo",
+            "Custom.NumeroIniciativa",
             "Custom.Sistema_1",
             "Custom.Sistema_2",
             "Custom.Sistema_3",
@@ -41,9 +41,8 @@ namespace LineaBaseETB_V2.Services
             "Custom.Fecha_PnP"
         };
 
-        private const int MaxBatchSize = 200;  // Tamaño recomendado por 
-        private const int MaxItemsToFetch = 20000; // Límite máximo permitido 
-
+        private const int MaxBatchSize = 200;
+        private const int MaxItemsToFetch = 20000;
 
         public AzureDevOpsService(string organization, string personalAccessToken)
         {
@@ -56,7 +55,6 @@ namespace LineaBaseETB_V2.Services
             using var connection = new VssConnection(_uri, new VssCredentials(_credentials));
             var projectClient = connection.GetClient<ProjectHttpClient>();
             var proyectos = await projectClient.GetProjects();
-
             return proyectos.Select(p => p.Name).ToList();
         }
 
@@ -67,11 +65,11 @@ namespace LineaBaseETB_V2.Services
             var wiql = new Wiql
             {
                 Query = $@"
-            SELECT [System.Id] FROM WorkItems 
-            WHERE [System.TeamProject] = '{proyecto}' 
-              AND [System.State] <> 'Closed' 
-              AND [System.CreatedDate] >= @StartOfYear
-            ORDER BY [System.Id] DESC"
+                    SELECT [System.Id] FROM WorkItems 
+                    WHERE [System.TeamProject] = '{proyecto}'
+                      AND [System.State] NOT IN ('Done', 'Closed')
+                      AND [System.CreatedDate] >= @StartOfYear
+                    ORDER BY [System.Id] DESC"
             };
 
             var result = await client.QueryByWiqlAsync(wiql);
@@ -80,26 +78,24 @@ namespace LineaBaseETB_V2.Services
                 return new List<WorkItemModel>();
 
             var ids = result.WorkItems.Select(wi => wi.Id).Take(MaxItemsToFetch).ToArray();
-
             var allWorkItems = new List<WorkItemModel>();
-            var tasks = new List<Task<List<WorkItem>>>();
 
             for (int i = 0; i < ids.Length; i += MaxBatchSize)
             {
                 var batchIds = ids.Skip(i).Take(MaxBatchSize).ToArray();
                 try
                 {
-                    // Intenta obtener el batch de Work Items
                     var batch = await client.GetWorkItemsAsync(batchIds, fields);
                     foreach (var wi in batch)
                     {
-                        allWorkItems.Add(MapWorkItemToModel(wi));
+                        var model = MapWorkItemToModel(wi);
+                        // Seguridad: si por alguna razón el estado es Done/Closed, no lo agregues
+                        if (model.State != "Done" && model.State != "Closed")
+                            allWorkItems.Add(model);
                     }
                 }
                 catch (Exception ex)
                 {
-                    // Registra el error y continúa con el siguiente batch
-                    // Puedes usar un logger o simplemente imprimir en consola/log de la app
                     Console.WriteLine($"Error al obtener el batch de Work Items (IDs: {string.Join(",", batchIds)}): {ex.Message}");
                 }
             }
@@ -107,16 +103,15 @@ namespace LineaBaseETB_V2.Services
             return allWorkItems;
         }
 
-
         private WorkItemModel MapWorkItemToModel(WorkItem wi)
         {
             return new WorkItemModel
             {
-                Id = wi.Id ?? 0,  // AGREGADO
+                Id = wi.Id ?? 0,
                 Title = GetFieldValue<string>(wi, "System.Title"),
                 State = GetFieldValue<string>(wi, "System.State"),
-                Type = GetFieldValue<string>(wi, "System.WorkItemType"),         // AGREGADO
-                AssignedTo = GetFieldValue<string>(wi, "System.AssignedTo"),     // 
+                Type = GetFieldValue<string>(wi, "System.WorkItemType"),
+                AssignedTo = GetFieldValue<string>(wi, "System.AssignedTo"),
                 NumeroIniciativa = GetFieldValue<string>(wi, "Custom.NumeroIniciativa"),
                 Sistema1 = GetFieldValue<string>(wi, "Custom.Sistema_1"),
                 Sistema2 = GetFieldValue<string>(wi, "Custom.Sistema_2"),
@@ -141,7 +136,6 @@ namespace LineaBaseETB_V2.Services
             {
                 if (value is T variable)
                     return variable;
-
                 try
                 {
                     return (T)Convert.ChangeType(value, typeof(T));
@@ -159,13 +153,10 @@ namespace LineaBaseETB_V2.Services
             var val = GetFieldValue<object>(wi, fieldName);
             if (val == null)
                 return null;
-
             if (val is DateTime dt)
                 return dt;
-
             if (DateTime.TryParse(val.ToString(), out DateTime parsed))
                 return parsed;
-
             return null;
         }
     }
