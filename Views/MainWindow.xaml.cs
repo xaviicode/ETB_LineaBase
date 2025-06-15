@@ -36,6 +36,11 @@ namespace LineaBaseETB_V2.Views
                 // MessageBox.Show($"Work Item seleccionado: {selectedItem}");
             }
         }
+
+        private void ComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+
+        }
     }
 }
 

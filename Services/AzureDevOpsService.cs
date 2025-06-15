@@ -16,7 +16,6 @@ namespace LineaBaseETB_V2.Services
         private readonly Uri _uri;
         private readonly VssBasicCredential _credentials;
 
-        // Campos a consultar, ajusta según tus necesidades
         private readonly string[] fields = new[]
         {
             "System.Id",
@@ -65,12 +64,14 @@ namespace LineaBaseETB_V2.Services
             var wiql = new Wiql
             {
                 Query = $@"
-                    SELECT [System.Id] FROM WorkItems 
-                    WHERE [System.TeamProject] = '{proyecto}'
-                      AND [System.State] NOT IN ('Done', 'Closed')
-                      AND [System.CreatedDate] >= @StartOfYear
-                    ORDER BY [System.Id] DESC"
+                SELECT [System.Id] FROM WorkItems 
+                WHERE [System.TeamProject] = '{proyecto}'
+                  AND [System.State] NOT IN ('Done', 'Closed')
+                  AND [System.CreatedDate] >= @StartOfYear
+                  AND [Custom.NumeroIniciativa] <> ''
+                ORDER BY [System.Id] DESC"
             };
+
 
             var result = await client.QueryByWiqlAsync(wiql);
 
@@ -89,9 +90,13 @@ namespace LineaBaseETB_V2.Services
                     foreach (var wi in batch)
                     {
                         var model = MapWorkItemToModel(wi);
-                        // Seguridad: si por alguna razón el estado es Done/Closed, no lo agregues
-                        if (model.State != "Done" && model.State != "Closed")
+                        // Validación adicional por seguridad
+                        if (model.State != "Done" &&
+                            model.State != "Closed" &&
+                            !string.IsNullOrEmpty(model.NumeroIniciativa))
+                        {
                             allWorkItems.Add(model);
+                        }
                     }
                 }
                 catch (Exception ex)
