@@ -162,10 +162,18 @@
         <ProgressBar Grid.Row="6" Margin="0,241,0,193" IsIndeterminate="True" Visibility="{Binding IsLoading, Converter={StaticResource BooleanToVisibilityConverter}}" />
 
         <!-- DataGrid para mostrar Work Items -->
-        <DataGrid ItemsSource="{Binding WorkItemsView}" AutoGenerateColumns="False" IsReadOnly="True" Grid.Row="7" Margin="0,76,0,67">
+        <DataGrid ItemsSource="{Binding WorkItemsView}"
+          AutoGenerateColumns="False"
+          IsReadOnly="True"
+          Grid.Row="7"
+          Margin="0,76,0,67"
+          HorizontalScrollBarVisibility="Auto"
+          VerticalScrollBarVisibility="Auto"
+          CanUserResizeColumns="True"
+          MinColumnWidth="50">
             <DataGrid.Columns>
                 <DataGridTextColumn Header="ID" Binding="{Binding Id}" Width="Auto" />
-                <DataGridTextColumn Header="Título" Binding="{Binding Title}" Width="2*" />
+                <DataGridTextColumn Header="Título" Binding="{Binding Title}" Width="Auto" />
                 <DataGridTextColumn Header="Estado" Binding="{Binding State}" Width="Auto" />
                 <DataGridTextColumn Header="Número Iniciativa" Binding="{Binding NumeroIniciativa}" Width="Auto" />
                 <DataGridTextColumn Header="Sistema 1" Binding="{Binding Sistema1}" Width="Auto" />
@@ -184,5 +192,6 @@
                 <DataGridTextColumn Header="Fecha PnP" Binding="{Binding FechaPnP, StringFormat=d}" Width="Auto" />
             </DataGrid.Columns>
         </DataGrid>
+
     </Grid>
 </Window>
