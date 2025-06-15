@@ -159,6 +159,8 @@
         </StackPanel>
 
         <!-- Mensaje de estado y progreso -->
+        <TextBlock Text="{Binding StatusMessage}" Grid.Row="6" Foreground="{StaticResource ETBAzulFuerteBrush}" FontWeight="SemiBold" TextWrapping="Wrap" Margin="0,10,0,0" />
+        <TextBlock Text="{Binding CanConsultar}" Foreground="Red" Grid.Row="6" HorizontalAlignment="Right" Margin="0,10,10,0" Width="26" />
         <ProgressBar Grid.Row="6" Margin="0,241,0,193" IsIndeterminate="True" Visibility="{Binding IsLoading, Converter={StaticResource BooleanToVisibilityConverter}}" />
 
         <!-- DataGrid para mostrar Work Items -->
