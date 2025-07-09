@@ -224,3 +224,7 @@ C:\Users\OscarJavierLopezGome\source\repos\ETB_LineaBase\LineaBaseETB_V2\bin\Deb
 C:\Users\OscarJavierLopezGome\source\repos\ETB_LineaBase\LineaBaseETB_V2\bin\Debug\CommunityToolkit.Mvvm.xml
 C:\Users\OscarJavierLopezGome\source\repos\ETB_LineaBase\LineaBaseETB_V2\obj\Debug\LineaBaseETB_V2.csproj.SuggestedBindingRedirects.cache
 C:\Users\OscarJavierLopezGome\source\repos\ETB_LineaBase\LineaBaseETB_V2\obj\Debug\LineaBaseETB_V2.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\OscarJavierLopezGome\source\repos\ETB_LineaBase\LineaBaseETB_V2\bin\Debug\LineaBaseETB_V2.exe.manifest
+C:\Users\OscarJavierLopezGome\source\repos\ETB_LineaBase\LineaBaseETB_V2\bin\Debug\LineaBaseETB_V2.application
+C:\Users\OscarJavierLopezGome\source\repos\ETB_LineaBase\LineaBaseETB_V2\obj\Debug\LineaBaseETB_V2.exe.manifest
+C:\Users\OscarJavierLopezGome\source\repos\ETB_LineaBase\LineaBaseETB_V2\obj\Debug\LineaBaseETB_V2.application
