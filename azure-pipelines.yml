@@ -1,14 +1,37 @@
 trigger:
   branches:
     include:
-      - main
+    - main  # o la rama que uses
 
 pool:
-  vmImage: 'windows-latest'
+  vmImage: 'windows-latest'  # o 'ubuntu-latest' según preferencia
+
 steps:
-  - task: UseDotNet@2
-    inputs:
-      packageType: 'sdk'
-      version: '7.x'
-  - script: dotnet build
-  - script: dotnet test
+- task: UseDotNet@2
+  inputs:
+    packageType: 'sdk'
+    version: '4.8.1'   # Cambia a la versión que usa tu proyecto
+
+- task: NuGetToolInstaller@1
+  displayName: 'Instalar NuGet'
+
+- task: NuGetCommand@2
+  inputs:
+    restoreSolution: '**/*.sln'  # O archivo .csproj si no usas solución
+  displayName: 'Restaurar paquetes NuGet'
+
+- task: DotNetCoreCLI@2
+  inputs:
+    command: 'build'
+    projects: '**/*.csproj'      # Ajusta si es necesario
+    arguments: '--configuration Release'
+  displayName: 'Compilar solución'
+
+- task: DotNetCoreCLI@2
+  inputs:
+    command: 'test'
+    projects: '**/*.csproj'
+  displayName: 'Ejecutar pruebas unitarias'
+
+
+
