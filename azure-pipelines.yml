@@ -10,7 +10,7 @@ steps:
 - task: UseDotNet@2
   inputs:
     packageType: 'sdk'
-    version: 'v4.8.1'   # Cambia a la versión que usa tu proyecto
+    version: '9.0.302'   # Cambia a la versión que usa tu proyecto
 
 - task: NuGetToolInstaller@1
   displayName: 'Instalar NuGet'
