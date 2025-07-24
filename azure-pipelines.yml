@@ -1,0 +1,50 @@
+trigger:
+  branches:
+    include:
+    - main  # o la rama que uses
+
+pool:
+  vmImage: 'windows-latest'  # o 'ubuntu-latest' según preferencia
+
+steps:
+- task: UseDotNet@2
+  inputs:
+    packageType: 'sdk'
+    version: '9.0.302'   # Cambia a la versión que usa tu proyecto
+
+- task: NuGetToolInstaller@1
+  displayName: 'Instalar NuGet'
+
+- task: NuGetCommand@2
+  inputs:
+    restoreSolution: '**/*.sln'  # O archivo .csproj si no usas solución
+  displayName: 'Restaurar paquetes NuGet'
+
+- task: DotNetCoreCLI@2
+  inputs:
+    command: 'build'
+    projects: '**/*.csproj'      # Ajusta si es necesario
+    arguments: '--configuration Release'
+  displayName: 'Compilar solución'
+
+- task: DotNetCoreCLI@2
+  inputs:
+    command: 'test'
+    projects: '**/*.csproj'
+  displayName: 'Ejecutar pruebas unitarias'
+
+- task: NuGetCommand@2
+  inputs:
+    command: 'restore'
+    restoreSolution: 'C:\Users\OscarJavierLopezGome\source\repos\ETB_LineaBase\LineaBaseETB_V2.sln' # Ajusta al nombre y ruta correctos
+    feedsToUse: 'select'
+
+- task: VSBuild@1
+  inputs:
+    solution: 'C:\Users\OscarJavierLopezGome\source\repos\ETB_LineaBase\LineaBase_V2.sln'
+    platform: 'Any CPU'
+    configuration: 'Release'
+
+
+
+
