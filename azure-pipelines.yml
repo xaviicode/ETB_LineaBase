@@ -39,6 +39,12 @@ steps:
     restoreSolution: 'C:\Users\OscarJavierLopezGome\source\repos\ETB_LineaBase\LineaBaseETB_V2.sln' # Ajusta al nombre y ruta correctos
     feedsToUse: 'select'
 
+- task: VSBuild@1
+  inputs:
+    solution: 'C:\Users\OscarJavierLopezGome\source\repos\ETB_LineaBase\LineaBase_V2.sln'
+    platform: 'Any CPU'
+    configuration: 'Release'
+
 
 
 
