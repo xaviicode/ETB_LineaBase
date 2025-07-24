@@ -33,5 +33,12 @@ steps:
     projects: '**/*.csproj'
   displayName: 'Ejecutar pruebas unitarias'
 
+- task: NuGetCommand@2
+  inputs:
+    command: 'restore'
+    restoreSolution: 'C:\Users\OscarJavierLopezGome\source\repos\ETB_LineaBase\LineaBaseETB_V2.sln' # Ajusta al nombre y ruta correctos
+    feedsToUse: 'select'
+
+
 
 
